@@ -11,7 +11,7 @@
   <img src="https://img.shields.io/github/license/JianShanAgent/site-bwiki-yys?label=License&color=2f6b5a&style=flat-square&labelColor=1f3b34" alt="License">
 </p>
 
-<sub>JianShanAgent site plugin for the Onmyoji story wiki on BWiki (`wiki.biligame.com/yys`), built on the BWiki platform support bundled with the core. Adds structured shikigami lookups via Semantic MediaWiki, plus this site's HTML cleaning rules, page exclusions, research wording and persona.</sub>
+<sub>JianShanAgent site plugin for the Onmyoji story wiki on BWiki (`wiki.biligame.com/yys`), built on the BWiki platform support bundled with the core. Adds structured shikigami lookups via Semantic MediaWiki, song titles and album info for the lyrics pages in the knowledge base, plus this site's HTML cleaning rules, page exclusions, research wording and persona.</sub>
 
 ## 插件简介
 
@@ -35,11 +35,37 @@ BWiki 平台的东西（语义查询接口、取数的速率、平台组件的�
 
 式神以外的页面走通用的查询：按标题找、全文搜索。
 
-### 2. 清洗规则、不入库的页面、查证提示词与人设（纯配置）
+### 2. 带着歌名的歌词
+
+「音乐曲库」的歌词一首一页（491 页），标题是编号（`音乐曲库/歌词/402981386-1`），正文只有制作信息和带时间轴的歌词，没有歌名。歌名、专辑、发行日期、对应的式神和活动记在「音乐曲库/数据」这一页的源码里。插件建知识库时多取这一页的源码，把歌词页的文档写成：
+
+```text
+《奔向刹那之后（刹那のその先へ）》歌词
+
+《奔向刹那之后（刹那のその先へ）》的歌词。
+出处：专辑《奔向刹那之后（刹那のその先へ）》的第 1 首（2026-10-10 发行，官方专辑 · 周年·印象曲）
+时长：3:30
+演唱：R!N/Gemie、网易阴阳师手游
+语种：日文
+活动：十周年
+
+## 制作信息
+- 演唱：R!N/网易阴阳师手游
+- ……
+
+## 歌词
+ハイラ ハイラ（Hai-La Hai-La）
+刹那のその先へ（刹那之后）
+……
+```
+
+歌词去掉了时间轴，译文跟在原文后面。数据页里没有的歌词页标题照旧。数据页或歌词页在 wiki 上改了，知识库的自动更新会跟着重做。
+
+### 3. 清洗规则、不入库的页面、查证提示词与人设（纯配置）
 
 在 [`config.yaml`](src/jianshanagent_site_bwiki_yys/config.yaml) 的 `extend` 段里：
 
-- **清洗规则**：式神页的立绘框、传记前面的小目录、按钮式标签页的那排按钮、插画故事页顶部的字数统计不进知识库；
+- **清洗规则**：式神页的立绘框、传记前面的小目录、按钮式标签页的那排按钮、插画故事页顶部的字数统计、面包屑不进知识库。页面底部的导航表平台已经去掉了；整页只有导航表的页面（「花合战」是一张历年皮肤的名单）留着它；
 - **不入库的页面**：首页的各个板块、新建页面用的预设、沙盒、检索页背后的数据页，共 38 个，都是给编辑用的；
 - **查证提示词**：问题分类（式神、剧情、设定、活动……）、容易张冠李戴的地方（同一个角色的几个形态各有各的页面）；
 - **人设**：阴阳师剧情百科助手。
@@ -75,7 +101,7 @@ wikis:
 
 ## 配置说明
 
-配置名 `site.bwiki_yys`，默认配置在 [`src/jianshanagent_site_bwiki_yys/config.yaml`](src/jianshanagent_site_bwiki_yys/config.yaml)：`wiki` 段是哪些页面算式神、哪些值等于没填；`extend` 段是并进通用配置的内容。要改某一项，在实例仓库新建 `config/site.bwiki_yys.yaml` 只写要改的字段。
+配置名 `site.bwiki_yys`，默认配置在 [`src/jianshanagent_site_bwiki_yys/config.yaml`](src/jianshanagent_site_bwiki_yys/config.yaml)：`wiki` 段是哪些页面算式神、哪些值等于没填；`knowledge` 段是歌词页的前缀和数据页的标题；`extend` 段是并进通用配置的内容。要改某一项，在实例仓库新建 `config/site.bwiki_yys.yaml` 只写要改的字段。
 
 ## 目录结构与本地开发
 
@@ -83,7 +109,8 @@ wikis:
 src/jianshanagent_site_bwiki_yys/
 ├── plugin.yaml      # 插件清单（id: bwiki_yys, platform: bwiki）
 ├── config.yaml      # 默认配置与这个站对通用配置的补充（extend）
-└── wiki.py          # 查询扩展点实现：YysProvider（式神）
+├── wiki.py          # 查询扩展点实现：YysProvider（式神）
+└── knowledge.py     # 知识库扩展点实现：YysKnowledge（歌词页配上歌名）
 ```
 
 本地开发时把 [`agent-core`](https://github.com/JianShanAgent/agent-core) 放在同级目录后运行：

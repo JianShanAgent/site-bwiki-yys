@@ -10,6 +10,7 @@ from jianshanagent.core.wiki import load_wiki, wiki_subject
 from jianshanagent.plugins.knowledge.settings import load_settings
 
 from conftest import CONFIG_DIR
+from jianshanagent_site_bwiki_yys.knowledge import YysKnowledge
 
 
 def test_naming_the_site_brings_the_platform_and_their_additions() -> None:
@@ -52,8 +53,13 @@ def test_the_knowledge_base_gets_the_rules_of_both_levels() -> None:
         settings.wiki.page_url("大天狗")
         == "https://wiki.biligame.com/yys/%E5%A4%A7%E5%A4%A9%E7%8B%97"
     )
-    # 平台和这个插件都没接知识库这个扩展点：入库的只有条目页
-    assert load_sites(config, EXTENSION_KNOWLEDGE, load_wiki(config, "bwiki")) == []
+    # 整页只有导航块的页面（「花合战」）留着导航块，面包屑照样不要
+    assert settings.clean.nav_classes == {"navigation-not-searchable"}
+    assert "crumb" in settings.clean.remove_classes
+    # 平台没接知识库这个扩展点，这个插件接了：歌词页配上歌名
+    (plugin,) = load_sites(config, EXTENSION_KNOWLEDGE, load_wiki(config, "bwiki"))
+    assert isinstance(plugin, YysKnowledge) and settings.sites.ids == ("bwiki_yys",)
+    assert (plugin.lyrics_prefix, plugin.data_page) == ("音乐曲库/歌词/", "音乐曲库/数据")
 
 
 def test_the_additions_cannot_be_edited_from_the_admin_pages() -> None:
