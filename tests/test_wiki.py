@@ -8,9 +8,9 @@ import httpx
 from jianshanagent.core.config import load_config
 from jianshanagent.core.sites import EXTENSION_WIKI, load_sites
 from jianshanagent.core.wiki import load_wiki
+from jianshanagent.platforms.bwiki.wiki import BwikiPlatform
 from jianshanagent.plugins.wiki_query.client import WikiQueryClient
 from jianshanagent.plugins.wiki_query.formatters import format_page
-from jianshanagent_site_bwiki.wiki import BwikiPlatform
 
 from jianshanagent_site_bwiki_yys.wiki import KIND_SHIKIGAMI, YysProvider
 
@@ -127,13 +127,13 @@ class FakeBwiki:
 
 
 def _client(fake: FakeBwiki) -> WikiQueryClient:
-    """照 wiki_query 插件的做法接起来：配置里点了 bwiki_yys，上级 bwiki 排在前面。"""
+    """照 wiki_query 插件的做法接起来：配置里点了 bwiki_yys，BWiki 平台的那一份排在前面。"""
     config = load_config()
     wiki = load_wiki(config, "bwiki")
     client = WikiQueryClient(wiki, transport=httpx.MockTransport(fake))
     platform, yys = load_sites(config, EXTENSION_WIKI, wiki)
     assert isinstance(platform, BwikiPlatform) and isinstance(yys, YysProvider)
-    assert yys.platform is platform  # 站插件拿到了上级的实例
+    assert yys.platform is platform  # 站点插件拿到了平台的实例
     for provider in (platform, yys):
         client.add_provider(provider)
         provider.bind(client)

@@ -5,19 +5,19 @@
 <p align="center"><a href="https://github.com/JianShanAgent/agent-core">JianShanAgent（见山）</a>的 <a href="https://wiki.biligame.com/yys">BWiki 阴阳师剧情百科</a>站点插件。</p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/插件-站点%20·%20站-2f6b5a?style=flat-square&labelColor=1f3b34" alt="站点插件 · 站">
+  <img src="https://img.shields.io/badge/插件-站点-2f6b5a?style=flat-square&labelColor=1f3b34" alt="站点插件">
   <img src="https://img.shields.io/badge/id-bwiki__yys-e9a66b?style=flat-square&labelColor=1f3b34" alt="id: bwiki_yys">
-  <img src="https://img.shields.io/badge/上级-bwiki-e9a66b?style=flat-square&labelColor=1f3b34" alt="上级: bwiki">
+  <img src="https://img.shields.io/badge/平台-bwiki-e9a66b?style=flat-square&labelColor=1f3b34" alt="平台: bwiki">
   <img src="https://img.shields.io/github/license/JianShanAgent/site-bwiki-yys?label=License&color=2f6b5a&style=flat-square&labelColor=1f3b34" alt="License">
 </p>
 
-<sub>JianShanAgent site plugin for the Onmyoji story wiki on BWiki (`wiki.biligame.com/yys`), built on top of `site-bwiki`. Adds structured shikigami lookups via Semantic MediaWiki, plus this site's HTML cleaning rules, page exclusions, research wording and persona.</sub>
+<sub>JianShanAgent site plugin for the Onmyoji story wiki on BWiki (`wiki.biligame.com/yys`), built on the BWiki platform support bundled with the core. Adds structured shikigami lookups via Semantic MediaWiki, plus this site's HTML cleaning rules, page exclusions, research wording and persona.</sub>
 
 ## 插件简介
 
 [阴阳师剧情百科](https://wiki.biligame.com/yys)是玩家在 BWiki 上自建的《阴阳师》剧情资料站：主线、活动与式神伴生剧情的文本，式神的档案、传记、语音，剧情设定辞书，以及插画、影像、音乐的索引。
 
-本插件构建在 BWiki 平台插件 [`site-bwiki`](https://github.com/JianShanAgent/site-bwiki) 之上，把这个站特有的东西接进见山：
+BWiki 平台的东西（语义查询接口、取数的速率、平台组件的清洗规则）核心自带；本插件在它之上，把这个站特有的东西接进见山：
 
 ### 1. 式神直查
 
@@ -46,17 +46,18 @@
 
 ## 如何安装使用
 
-在实例仓库（参考线上实例 [`instance-yys`](https://github.com/JianShanAgent/instance-yys) 或模板 [`template-instance`](https://github.com/JianShanAgent/template-instance)）的 `pyproject.toml` 中同时加入 BWiki 平台插件与本插件：
+**在管理后台里一键添加（最省事）**：打开机器人管理后台的「Wiki」页，在站点目录里选平台「BWiki」，点「阴阳师剧情百科」的「添加」。机器人会下载本插件最新的发布、核对校验和后装上，`/查` 马上能用，不用重启；知识库在同一页里点「建知识库」。
+
+**随部署装进环境**：在实例仓库（参考线上实例 [`instance-yys`](https://github.com/JianShanAgent/instance-yys) 或模板 [`template-instance`](https://github.com/JianShanAgent/template-instance)）的 `pyproject.toml` 中加入本插件：
 
 ```toml
 dependencies = [
   "jianshanagent @ git+https://github.com/JianShanAgent/agent-core.git",
-  "jianshanagent-site-bwiki @ git+https://github.com/JianShanAgent/site-bwiki.git",
   "jianshanagent-site-bwiki-yys @ git+https://github.com/JianShanAgent/site-bwiki-yys.git",
 ]
 ```
 
-然后在实例的 `config/core.wiki.yaml` 的 `wikis` 名单里加上这个 wiki（上级 `bwiki` 会自动先加载）：
+然后在实例的 `config/core.wiki.yaml` 的 `wikis` 名单里加上这个 wiki（它在 BWiki 上写在它自己的清单里，核心带着的 BWiki 平台会先加载）：
 
 ```yaml
 name: "阴阳师"
@@ -80,17 +81,19 @@ wikis:
 
 ```text
 src/jianshanagent_site_bwiki_yys/
-├── plugin.yaml      # 插件清单（id: bwiki_yys, parent: bwiki）
+├── plugin.yaml      # 插件清单（id: bwiki_yys, platform: bwiki）
 ├── config.yaml      # 默认配置与这个站对通用配置的补充（extend）
 └── wiki.py          # 查询扩展点实现：YysProvider（式神）
 ```
 
-本地开发时把 [`agent-core`](https://github.com/JianShanAgent/agent-core) 和 [`site-bwiki`](https://github.com/JianShanAgent/site-bwiki) 放在同级目录后运行：
+本地开发时把 [`agent-core`](https://github.com/JianShanAgent/agent-core) 放在同级目录后运行：
 
 ```bash
 uv sync --extra dev
 uv run pytest
 ```
+
+**发版**：改 `pyproject.toml` 里的 `version` 并提交，打一个带附注的标签 `v<版本>` 推上来，[发版流程](.github/workflows/release.yml)会跑测试、打安装包并发 Release；管理后台的一键添加和「更新插件」取的就是最新的 Release。
 
 ## 开源许可
 

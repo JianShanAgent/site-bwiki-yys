@@ -12,6 +12,6 @@ wikis:
     api_url: "https://wiki.biligame.com/yys/api.php"
     site_base: "https://wiki.biligame.com/yys"
     article_path: "/$1"
-    # 站点插件：BWiki 上的阴阳师剧情百科（jianshanagent-site-bwiki-yys），
-    # 它的上级 BWiki 平台（jianshanagent-site-bwiki）会先加载
+    # 站点插件：BWiki 上的阴阳师剧情百科（jianshanagent-site-bwiki-yys）。
+    # 它是 BWiki 平台上的站，核心带着的 BWiki 那一份会先加载
     site: bwiki_yys

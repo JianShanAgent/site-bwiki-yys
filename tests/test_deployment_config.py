@@ -13,15 +13,15 @@ from conftest import CONFIG_DIR
 
 
 def test_naming_the_site_brings_the_platform_and_their_additions() -> None:
-    assert {"bwiki", "bwiki_yys"} <= set(installed_sites())  # 两个包都装着、都登记了
+    assert "bwiki_yys" in installed_sites()  # 这个包装着、登记了
     config = load_config(CONFIG_DIR, with_overrides=False)
-    # 配置里只写了 bwiki_yys，上级 bwiki 顺着清单带出来
+    # 配置里只写了 bwiki_yys：它是 BWiki 上的站，核心带着的 BWiki 平台那一份跟着加载
     assert [wiki["site"] for wiki in config.get("core.wiki")["wikis"]] == ["bwiki_yys"]
-    assert config.sites == ["bwiki", "bwiki_yys"]
+    assert (config.platforms, config.sites) == (["bwiki"], ["bwiki_yys"])
     assert config.site("bwiki_yys")["wiki"]["shikigami"]["condition"] == "[[式神名::+]]"
-    # 两个插件的默认配置各在自己的包里
+    # 默认配置各在各的地方：站点插件的在自己的包里，平台的在核心里
     assert config.source_path("site.bwiki_yys").parent.name == "jianshanagent_site_bwiki_yys"
-    assert config.source_path("site.bwiki").parent.name == "jianshanagent_site_bwiki"
+    assert config.source_path("platform.bwiki").parent.parent.name == "platforms"
 
     # 这个站对通用配置的补充，读配置时就并进去了
     research = config.plugin("research")
@@ -52,15 +52,15 @@ def test_the_knowledge_base_gets_the_rules_of_both_levels() -> None:
         settings.wiki.page_url("大天狗")
         == "https://wiki.biligame.com/yys/%E5%A4%A7%E5%A4%A9%E7%8B%97"
     )
-    # 两级都没接知识库这个扩展点：入库的只有条目页
+    # 平台和这个插件都没接知识库这个扩展点：入库的只有条目页
     assert load_sites(config, EXTENSION_KNOWLEDGE, load_wiki(config, "bwiki")) == []
 
 
 def test_the_additions_cannot_be_edited_from_the_admin_pages() -> None:
     config = load_config(CONFIG_DIR, with_overrides=False)
-    for name in ("site.bwiki", "site.bwiki_yys"):
+    for name in ("platform.bwiki", "site.bwiki_yys"):
         data = config.get(name)
         fields = build_schema(data, data, {}, name=name)
         locked = {".".join(field["path"]) for field in fields if field["locked"]}
-        # 站点插件对通用配置的补充：读配置时就并进去了，在网页上改它不会生效
+        # 平台、站点插件对通用配置的补充：读配置时就并进去了，在网页上改它不会生效
         assert locked == {"extend"}, name

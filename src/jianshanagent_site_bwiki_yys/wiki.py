@@ -2,7 +2,7 @@
 
 这个站的式神页是模板拼的，稀有度、上线日期、CV、其他形态、设定摘要都记成了语义属性
 （Semantic MediaWiki）。``/查 大天狗`` 要的是这些，不是页面摘要（BWiki 也给不出页面摘要），
-所以式神由这个插件接进通用的查询：一次语义查询取回全部式神（接口在上级 ``bwiki`` 那里），
+所以式神由这个插件接进通用的查询：一次语义查询取回全部式神（接口在核心带着的 BWiki 平台那里），
 按名字找、排成卡片。
 """
 
@@ -13,6 +13,7 @@ from collections.abc import Sequence
 from dataclasses import dataclass
 from typing import Any
 
+from jianshanagent.platforms.bwiki.wiki import BwikiPlatform, SemanticRow
 from jianshanagent.plugins.wiki_query.client import (
     NameMatch,
     PageContent,
@@ -21,7 +22,6 @@ from jianshanagent.plugins.wiki_query.client import (
 )
 from jianshanagent.plugins.wiki_query.formatters import bold, finish
 from jianshanagent.plugins.wiki_query.provider import SiteSetup, WikiProvider
-from jianshanagent_site_bwiki.wiki import BwikiPlatform, SemanticRow
 
 KIND_SHIKIGAMI = "shikigami"
 
@@ -117,7 +117,7 @@ class YysProvider(WikiProvider):
         condition: str = DEFAULT_CONDITION,
         blank_values: Sequence[str] = (),
     ):
-        #: 上级（BWiki 平台）在查询这个扩展点上的实例：语义查询走它
+        #: BWiki 平台在查询这个扩展点上的实例：语义查询走它
         self.platform = platform
         #: 哪些页面算式神（语义查询的条件）
         self.condition = condition
@@ -227,10 +227,10 @@ def _line(label: str, value: str) -> str:
 
 
 def create(setup: SiteSetup) -> YysProvider:
-    """入口：``setup.raw`` 是这个插件自己的配置；``setup.parent(类)`` 拿上级的实例。"""
+    """入口：``setup.raw`` 是这个插件自己的配置；``setup.platform(类)`` 拿平台的实例。"""
     options = (setup.raw.get("wiki") or {}).get("shikigami") or {}
     return YysProvider(
-        setup.parent(BwikiPlatform),
+        setup.platform(BwikiPlatform),
         condition=str(options.get("condition") or DEFAULT_CONDITION),
         blank_values=[str(value) for value in options.get("blank_values") or []],
     )

@@ -3,7 +3,7 @@ id: bwiki_yys
 kind: site
 name: 阴阳师剧情百科
 description: BWiki 上的阴阳师剧情百科（wiki.biligame.com/yys）特有的东西：式神的查询（稀有度、上线日期、CV、其他形态、设定摘要），以及这个站的清洗规则、不入库的页面和提示词里的说法。
-parent: bwiki   # 式神的数据取自 BWiki 的语义查询
+platform: bwiki   # BWiki 上的站：式神的数据取自 BWiki 的语义查询
 capabilities:
   - wiki        # 查询：式神
   - extend      # 对通用配置的补充：清洗规则、不入库的页面、提示词里的说法、人设
